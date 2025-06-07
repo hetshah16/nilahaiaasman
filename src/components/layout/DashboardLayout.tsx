@@ -1,9 +1,8 @@
-
-import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import Sidebar from './Sidebar';
-import Header from './Header';
+import React from "react";
+import { Outlet, Navigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
 
 const DashboardLayout: React.FC = () => {
   const { user, isLoading } = useAuth();
