@@ -39,6 +39,7 @@ const menuItems: MenuItem[] = [
   { icon: BookOpen, label: 'My Content', path: '/my-content', roles: ['teacher'] },
   { icon: Star, label: 'Recommendations', path: '/recommendations', roles: ['student'] },
   { icon: BookOpen, label: 'Courses', path: '/courses', roles: ['student'] },
+  { icon: BookOpen, label: 'All Courses', path: '/all-courses', roles: ['student'] },
   { icon: Heart, label: 'Feedback', path: '/feedback', roles: ['student'] },
   { icon: User, label: 'Profile', path: '/profile', roles: ['super-admin', 'admin', 'teacher', 'student'] },
   { icon: Settings, label: 'Settings', path: '/settings', roles: ['super-admin', 'admin', 'teacher', 'student'] },
