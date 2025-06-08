@@ -1,111 +1,71 @@
-import React, { useState } from "react";
-import { CourseCard, CourseCardSkeleton } from "../components/ui/CourseCard";
+import React, { useState, useEffect } from "react";
+import { CourseCardSkeleton } from "../components/ui/CourseCard";
 import { useAuth } from "../contexts/AuthContext";
-
-export const dummyCourses = [
-  {
-    id: 1,
-    title: "React for Beginners",
-    description: "Learn the basics of React and build interactive UIs.",
-    instructor: {
-      name: "Dr. Sarah Johnson",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    tags: ["Beginner", "Tech"],
-    progress: 60,
-    thumbnail:
-      "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
-    rating: 4.7,
-    modulesCompleted: 6,
-    totalModules: 10,
-    certificate: false,
-  },
-  {
-    id: 2,
-    title: "Mindfulness & Wellness",
-    description: "Explore meditation, mindfulness, and healthy habits.",
-    instructor: {
-      name: "Guru Anand",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    tags: ["Wellness", "Beginner"],
-    progress: 100,
-    thumbnail:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-    rating: 4.9,
-    modulesCompleted: 8,
-    totalModules: 8,
-    certificate: true,
-  },
-  {
-    id: 3,
-    title: "UI/UX Design Essentials",
-    description:
-      "Master the fundamentals of user interface and experience design.",
-    instructor: {
-      name: "Emily Carter",
-      avatar: "https://randomuser.me/api/portraits/women/65.jpg",
-    },
-    tags: ["Design", "Intermediate"],
-    progress: 35,
-    thumbnail:
-      "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80",
-    rating: 4.5,
-    modulesCompleted: 3,
-    totalModules: 10,
-    certificate: false,
-  },
-  {
-    id: 4,
-    title: "Python for Data Science",
-    description: "Analyze data and build models using Python.",
-    instructor: {
-      name: "Prof. Alan Turing",
-      avatar: "https://randomuser.me/api/portraits/men/45.jpg",
-    },
-    tags: ["Tech", "Data Science"],
-    progress: 80,
-    thumbnail:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-    rating: 4.8,
-    modulesCompleted: 8,
-    totalModules: 10,
-    certificate: false,
-  },
-  {
-    id: 5,
-    title: "Creative Writing Workshop",
-    description: "Unlock your creativity and write compelling stories.",
-    instructor: {
-      name: "Jane Austen",
-      avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-    },
-    tags: ["Writing", "Beginner"],
-    progress: 20,
-    thumbnail:
-      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80",
-    rating: 4.3,
-    modulesCompleted: 2,
-    totalModules: 10,
-    certificate: false,
-  },
-];
+import { dummyCourses } from "../data/dummyCourses";
 
 export default function Courses() {
   const [view, setView] = useState("grid");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<number[]>([]);
   const { user, isLoading } = useAuth();
 
-  // Filter courses based on search
-  const filteredCourses = dummyCourses.filter((course) => {
-    const searchLower = search.toLowerCase();
-    return (
-      course.title.toLowerCase().includes(searchLower) ||
-      course.instructor.name.toLowerCase().includes(searchLower) ||
-      course.tags.some((tag) => tag.toLowerCase().includes(searchLower))
-    );
-  });
+  const getUserId = () => user?.email?.trim().toLowerCase() || "";
+
+  // Fetch enrolled courses
+  const fetchEnrolledCourses = async () => {
+    if (!getUserId()) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:4000/api/enroll/${getUserId()}`
+      );
+      const data = await res.json();
+      setEnrolledCourseIds(data.courses || []);
+    } catch (err) {
+      setEnrolledCourseIds([]);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchEnrolledCourses();
+    // eslint-disable-next-line
+  }, [user]);
+
+  // Disenroll handler
+  const handleDisenroll = async (courseId: number) => {
+    if (!getUserId()) return;
+    setLoading(true);
+    try {
+      await fetch("http://localhost:4000/api/enroll", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: getUserId(),
+          courseId,
+        }),
+      });
+      // Remove from UI immediately
+      setEnrolledCourseIds((prev) => prev.filter((id) => id !== courseId));
+    } catch (err) {
+      // Optionally show error
+    }
+    setLoading(false);
+  };
+
+  const filteredCourses = dummyCourses.filter(
+    (course) =>
+      enrolledCourseIds.includes(course.id) &&
+      (
+        course.title.toLowerCase().includes(search.toLowerCase()) ||
+        course.instructor.name.toLowerCase().includes(search.toLowerCase()) ||
+        course.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
+      )
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -135,7 +95,6 @@ export default function Courses() {
           </button>
         </div>
       </div>
-      {/* Filters/Search */}
       <div className="mb-6 flex flex-wrap gap-4 items-center">
         <div className="relative w-full max-w-xs">
           <input
@@ -159,9 +118,7 @@ export default function Courses() {
             </svg>
           </span>
         </div>
-        {/* Category dropdown, Progress radio/tags, Sort dropdown */}
       </div>
-      {/* Courses Grid/List */}
       <div
         className={
           view === "grid"
@@ -174,7 +131,45 @@ export default function Courses() {
               .fill(0)
               .map((_, i) => <CourseCardSkeleton key={i} />)
           : filteredCourses.map((course) => (
-              <CourseCard key={course.id} course={course} view={view} />
+              <div key={course.id} className="bg-card rounded-lg border shadow p-4 flex flex-col h-full">
+                <div className="flex-1">
+                  <h2 className="text-xl font-semibold mb-1">{course.title}</h2>
+                  <p className="text-muted-foreground mb-2">{course.description}</p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <img
+                      src={course.instructor.avatar}
+                      alt={course.instructor.name}
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <span className="text-sm">{course.instructor.name}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {course.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="bg-muted px-2 py-1 rounded text-xs text-muted-foreground"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    className="flex-1 py-2 bg-earth-brown text-white rounded-lg hover:bg-earth-brown/90 transition-colors text-sm"
+                  >
+                    Continue Learning
+                  </button>
+                  <button
+                    onClick={() => handleDisenroll(course.id)}
+                    className="flex-1 py-2 bg-earth-brown text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+                    disabled={loading}
+                    title="Disenroll"
+                  >
+                    Disenroll
+                  </button>
+                </div>
+              </div>
             ))}
         {!loading && filteredCourses.length === 0 && (
           <div className="col-span-full text-center text-muted-foreground py-12">

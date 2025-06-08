@@ -1,9 +1,42 @@
 import React, { useState } from "react";
-import { dummyCourses } from "./Courses";
+import { dummyCourses } from "../data/dummyCourses";
 import { Dialog } from "@radix-ui/react-dialog";
 
 export default function AllCourses() {
-  const [enrollCourse, setEnrollCourse] = useState(null);
+  const [enrollCourse, setEnrollCourse] = useState<any>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const getUserId = () => email.trim().toLowerCase();
+
+  const handleEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!enrollCourse || !name || !email) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:4000/api/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: getUserId(),
+          courseId: enrollCourse.id,
+        }),
+      });
+      if (res.ok) {
+        alert("Enrollment submitted!");
+      } else {
+        alert("Failed to enroll.");
+      }
+    } catch (err) {
+      alert("Error connecting to backend.");
+    }
+    setLoading(false);
+    setEnrollCourse(null);
+    setName("");
+    setEmail("");
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -61,11 +94,7 @@ export default function AllCourses() {
                 Enroll in {enrollCourse.title}
               </h2>
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  alert("Enrollment submitted!");
-                  setEnrollCourse(null);
-                }}
+                onSubmit={handleEnroll}
                 className="flex flex-col gap-4"
               >
                 <input
@@ -73,18 +102,23 @@ export default function AllCourses() {
                   placeholder="Your Name"
                   required
                   className="border rounded px-3 py-2"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
                 />
                 <input
                   type="email"
                   placeholder="Your Email"
                   required
                   className="border rounded px-3 py-2"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                 />
                 <button
                   type="submit"
                   className="bg-earth-brown text-white px-4 py-2 rounded hover:bg-earth-brown/90 transition"
+                  disabled={loading}
                 >
-                  Submit Enrollment
+                  {loading ? "Enrolling..." : "Submit Enrollment"}
                 </button>
               </form>
             </div>

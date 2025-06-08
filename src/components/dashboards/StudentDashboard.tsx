@@ -1,14 +1,32 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BookOpen, Star, Clock, Award, TrendingUp, Target } from 'lucide-react';
 import StatsCard from '../ui/StatsCard';
+import { useAuth } from '../../contexts/AuthContext';
 
 const StudentDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const [enrolledCount, setEnrolledCount] = useState<number>(0);
+
+  useEffect(() => {
+    const getUserId = () => user?.email?.trim().toLowerCase() || "";
+    const fetchEnrolled = async () => {
+      if (!getUserId()) return;
+      try {
+        const res = await fetch(`http://localhost:4000/api/enroll/${getUserId()}`);
+        const data = await res.json();
+        setEnrolledCount(Array.isArray(data.courses) ? data.courses.length : 0);
+      } catch {
+        setEnrolledCount(0);
+      }
+    };
+    fetchEnrolled();
+  }, [user]);
+
   const stats = [
     {
       title: 'Enrolled Courses',
-      value: 8,
-      change: { value: '+2', trend: 'up' as const },
+      value: enrolledCount,
+      change: { value: '', trend: 'up' as const },
       icon: BookOpen,
       gradient: 'earth-gradient'
     },
