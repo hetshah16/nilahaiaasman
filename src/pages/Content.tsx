@@ -1,13 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Image, Video, Search, Filter, Upload as UploadIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '../contexts/AuthContext';
 
 interface UploadedFile {
   id: string;
@@ -25,8 +25,10 @@ const Content = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [selectedFileType, setSelectedFileType] = useState<string>('all');
-  
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
+
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const { data: apiFiles, isLoading } = useQuery({
     queryKey: ['uploadedFiles'],
@@ -47,7 +49,6 @@ const Content = () => {
 
   useEffect(() => {
     const storedMetadata = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
-    
     if (apiFiles && Array.isArray(apiFiles)) {
       const metadataMap = new Map();
       storedMetadata.forEach((meta: UploadedFile) => {
@@ -56,7 +57,6 @@ const Content = () => {
 
       const mergedFiles = apiFiles.map((fileName: string) => {
         const metadata = metadataMap.get(fileName);
-        
         const getFileTypeFromName = (name: string): 'text' | 'image' | 'video' => {
           const ext = name.split('.').pop()?.toLowerCase() || '';
           if (['txt', 'pdf', 'docx'].includes(ext)) return 'text';
@@ -64,7 +64,6 @@ const Content = () => {
           if (['mp4', 'avi', 'mov', 'wmv', 'flv'].includes(ext)) return 'video';
           return 'text';
         };
-
         return metadata || {
           id: fileName,
           subject: 'unknown',
@@ -83,22 +82,18 @@ const Content = () => {
 
   useEffect(() => {
     let filtered = files;
-
     if (searchTerm) {
       filtered = filtered.filter(file =>
         file.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         file.subject.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (selectedSubject !== 'all') {
       filtered = filtered.filter(file => file.subject === selectedSubject);
     }
-
     if (selectedFileType !== 'all') {
       filtered = filtered.filter(file => file.fileType === selectedFileType);
     }
-
     setFilteredFiles(filtered);
   }, [files, searchTerm, selectedSubject, selectedFileType]);
 
@@ -154,6 +149,35 @@ const Content = () => {
   const handleViewFile = (file: UploadedFile) => {
     const fileUrl = `http://localhost:8000/static/uploads/${file.fileName}`;
     window.open(fileUrl, '_blank');
+  };
+
+  // ENROLL HANDLER
+  const handleEnroll = async (file: UploadedFile) => {
+    if (!user?.email) {
+      alert("Please log in to enroll.");
+      return;
+    }
+    setEnrollingId(file.id);
+    try {
+      const res = await fetch("http://localhost:4000/api/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.email.trim().toLowerCase(),
+          courseId: file.id,
+        }),
+      });
+      if (res.ok) {
+        alert("Enrolled in this content!");
+        // Instantly show in My Courses and Dashboard by navigating or refetching
+        navigate('/courses'); // <--- This will show the update instantly
+      } else {
+        alert("Failed to enroll.");
+      }
+    } catch (err) {
+      alert("Error connecting to backend.");
+    }
+    setEnrollingId(null);
   };
 
   if (isLoading) {
@@ -294,8 +318,7 @@ const Content = () => {
                     </Badge>
                   </div>
                 </div>
-                
-                <div className="mt-4 pt-4 border-t">
+                <div className="mt-4 pt-4 border-t flex gap-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -303,6 +326,14 @@ const Content = () => {
                     onClick={() => handleViewFile(file)}
                   >
                     View File
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="w-full bg-earth-brown text-white hover:bg-earth-brown/90"
+                    onClick={() => handleEnroll(file)}
+                    disabled={enrollingId === file.id}
+                  >
+                    {enrollingId === file.id ? "Enrolling..." : "Enroll"}
                   </Button>
                 </div>
               </CardContent>

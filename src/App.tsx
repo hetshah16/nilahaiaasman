@@ -16,7 +16,9 @@ import NotFound from "./pages/NotFound";
 import Feedback from "./pages/Feedback";
 import Courses from "./pages/Courses";
 import AllCourses from "./pages/AllCourses"; // <-- Add this line
-import LanguageSwitcher from "./components/LanguageSwitcher";
+// import LanguageSwitcher from "./components/LanguageSwitcher";
+import Upload from "./pages/Upload"; // Import the Upload page
+import Content from "./pages/Content";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -28,9 +30,9 @@ const App = () => (
         <AuthProvider>
           <BrowserRouter>
             {/* Add LanguageSwitcher here */}
-            <div className="flex justify-end p-2">
+            {/* <div className="flex justify-end p-2">
               <LanguageSwitcher />
-            </div>
+            </div> */}
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
@@ -90,7 +92,7 @@ const App = () => (
                   path="upload"
                   element={
                     <div className="p-8 text-center text-muted-foreground">
-                      Upload page - Coming soon
+                      <Upload />
                     </div>
                   }
                 />
@@ -98,7 +100,7 @@ const App = () => (
                   path="my-content"
                   element={
                     <div className="p-8 text-center text-muted-foreground">
-                      My Content page - Coming soon
+                      <Content />
                     </div>
                   }
                 />
