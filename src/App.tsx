@@ -16,7 +16,7 @@ import NotFound from "./pages/NotFound";
 import Feedback from "./pages/Feedback";
 import Courses from "./pages/Courses";
 import AllCourses from "./pages/AllCourses"; // <-- Add this line
-
+import LanguageSwitcher from "./components/LanguageSwitcher";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -27,6 +27,10 @@ const App = () => (
         <Sonner />
         <AuthProvider>
           <BrowserRouter>
+            {/* Add LanguageSwitcher here */}
+            <div className="flex justify-end p-2">
+              <LanguageSwitcher />
+            </div>
             <Routes>
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
