@@ -17,6 +17,8 @@ import Feedback from "./pages/Feedback";
 import Courses from "./pages/Courses";
 import AllCourses from "./pages/AllCourses"; // <-- Add this line
 import LanguageSwitcher from "./components/LanguageSwitcher";
+import Upload from "./pages/Upload";
+import Content from "./pages/Content";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -35,6 +37,9 @@ const App = () => (
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/" element={<Upload />} />
+              <Route path="/upload" element={<Upload />} />
+              <Route path="/my-content" element={<Content />} />
               <Route path="/" element={<DashboardLayout />}>
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="profile" element={<Profile />} />
