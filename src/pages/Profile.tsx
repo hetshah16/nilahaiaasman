@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { User, Mail, Building, Calendar, Save } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -16,8 +15,10 @@ const Profile: React.FC = () => {
   });
 
   const handleSave = () => {
-    // Mock save functionality
-    console.log('Saving profile:', formData);
+    updateUser({
+      name: formData.name,
+      organizationName: formData.organizationName
+    });
     setIsEditing(false);
   };
 
@@ -26,7 +27,10 @@ const Profile: React.FC = () => {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Profile</h1>
         <button
-          onClick={() => setIsEditing(!isEditing)}
+          onClick={() => {
+            if (isEditing) handleSave();
+            else setIsEditing(true);
+          }}
           className="px-4 py-2 bg-earth-brown text-white rounded-lg hover:bg-deep-brown transition-colors flex items-center space-x-2"
         >
           {isEditing ? <Save size={16} /> : <User size={16} />}
@@ -39,7 +43,6 @@ const Profile: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-card rounded-xl p-6 border border-border nature-shadow-lg">
             <h2 className="text-xl font-semibold text-foreground mb-4">Personal Information</h2>
-            
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">Full Name</label>

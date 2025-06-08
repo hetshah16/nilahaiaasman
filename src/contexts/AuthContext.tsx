@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type UserRole = 'super-admin' | 'admin' | 'teacher' | 'student';
@@ -18,6 +17,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   register: (userData: Partial<User> & { password: string }) => Promise<boolean>;
+  updateUser: (updates: Partial<User>) => void;
   isLoading: boolean;
 }
 
@@ -67,7 +67,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for stored user session
     const storedUser = localStorage.getItem('vruksha_user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -77,12 +76,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
-    
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
     const foundUser = mockUsers.find(u => u.email === email && u.password === password);
-    
     if (foundUser) {
       const { password: _, ...userWithoutPassword } = foundUser;
       setUser(userWithoutPassword);
@@ -90,25 +85,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
       return true;
     }
-    
     setIsLoading(false);
     return false;
   };
 
   const register = async (userData: Partial<User> & { password: string }): Promise<boolean> => {
     setIsLoading(true);
-    
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if user already exists
     const existingUser = mockUsers.find(u => u.email === userData.email);
     if (existingUser) {
       setIsLoading(false);
       return false;
     }
-    
-    // Create new user
     const newUser: User = {
       id: Date.now().toString(),
       name: userData.name || '',
@@ -118,14 +106,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       organizationName: userData.organizationName,
       interests: userData.interests
     };
-    
-    // Add to mock users (in real app, this would be API call)
     mockUsers.push({ ...newUser, password: userData.password });
-    
     setUser(newUser);
     localStorage.setItem('vruksha_user', JSON.stringify(newUser));
     setIsLoading(false);
     return true;
+  };
+
+  // Update user and persist to localStorage
+  const updateUser = (updates: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...updates };
+      localStorage.setItem('vruksha_user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const logout = () => {
@@ -134,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, register, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

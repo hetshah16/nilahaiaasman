@@ -70,12 +70,7 @@ const menuItems: MenuItem[] = [
     path: "/upload",
     roles: ["teacher"],
   },
-  {
-    icon: Star,
-    label: "Recommendations",
-    path: "/recommendations",
-    roles: ["student"],
-  },
+ 
   { icon: BookOpen, label: "Courses", path: "/courses", roles: ["student"] },
   {
     icon: BookOpen,

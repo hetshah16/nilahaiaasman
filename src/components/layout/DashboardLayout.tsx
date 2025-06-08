@@ -4,12 +4,12 @@ import { useAuth } from "../../contexts/AuthContext";
 import Sidebar from "./Sidebar";
 
 const DashboardLayout: React.FC = () => {
-  const { user, isLoading, logout } = useAuth(); // make sure logout is exposed
+  const { user, isLoading, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout?.(); // optional if your context provides logout logic
-    localStorage.clear(); // clear any stored tokens if needed
+    logout?.();
+    localStorage.clear();
     navigate("/");
   };
 

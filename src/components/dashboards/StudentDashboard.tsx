@@ -123,7 +123,7 @@ const StudentDashboard: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Welcome back, Alex!</h1>
+          <h1 className="text-3xl font-bold text-foreground">Welcome back!</h1>
           <p className="text-muted-foreground mt-1">Continue your learning journey</p>
         </div>
         <div className="flex items-center space-x-3 px-4 py-2 bg-warm-beige rounded-lg">
