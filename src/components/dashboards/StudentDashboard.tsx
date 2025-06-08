@@ -1,9 +1,14 @@
-
-import React from 'react';
-import { BookOpen, Star, Clock, Award, TrendingUp, Target } from 'lucide-react';
+import React, { useState } from 'react';
+import { BookOpen, Star, Clock, Award, TrendingUp, Target, MessageCircle } from 'lucide-react';
 import StatsCard from '../ui/StatsCard';
 
 const StudentDashboard: React.FC = () => {
+  const [showChatbot, setShowChatbot] = useState(false);
+
+  const toggleChatbot = () => {
+    setShowChatbot(!showChatbot);
+  };
+
   const stats = [
     {
       title: 'Enrolled Courses',
@@ -124,7 +129,7 @@ const StudentDashboard: React.FC = () => {
             <h3 className="text-xl font-bold text-foreground">Recommended for You</h3>
             <Star className="text-yellow-500" size={24} />
           </div>
-          
+
           <div className="grid gap-6">
             {recommendedCourses.map((course, index) => (
               <div key={index} className="flex items-center space-x-4 p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
@@ -163,7 +168,7 @@ const StudentDashboard: React.FC = () => {
             <h3 className="text-xl font-bold text-foreground">Recent Achievements</h3>
             <Award className="text-terracotta" size={24} />
           </div>
-          
+
           <div className="space-y-4">
             {recentAchievements.map((achievement, index) => (
               <div key={index} className="flex items-start space-x-3 p-3 bg-muted/30 rounded-lg">
@@ -185,13 +190,13 @@ const StudentDashboard: React.FC = () => {
           <h3 className="text-xl font-bold text-foreground">Continue Learning</h3>
           <TrendingUp className="text-sage-green" size={24} />
         </div>
-        
+
         <div className="grid md:grid-cols-3 gap-6">
           {currentCourses.map((course, index) => (
             <div key={index} className="p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
               <h4 className="font-semibold text-foreground mb-2">{course.title}</h4>
               <p className="text-sm text-muted-foreground mb-3">by {course.instructor}</p>
-              
+
               <div className="space-y-3">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
@@ -205,12 +210,12 @@ const StudentDashboard: React.FC = () => {
                     ></div>
                   </div>
                 </div>
-                
+
                 <div className="text-xs text-muted-foreground">
                   <p>{course.nextDeadline}</p>
                   <p>Last accessed: {course.lastAccessed}</p>
                 </div>
-                
+
                 <button className="w-full py-2 bg-earth-brown text-white rounded-lg hover:bg-deep-brown transition-colors text-sm">
                   Continue
                 </button>
@@ -219,6 +224,40 @@ const StudentDashboard: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Floating Chatbot Toggle Button */}
+      <button
+        onClick={toggleChatbot}
+        className="fixed bottom-6 right-6 bg-earth-brown text-white p-4 rounded-full shadow-lg hover:bg-deep-brown transition-all z-50"
+      >
+        <MessageCircle size={24} />
+      </button>
+
+      {/* Chatbot Iframe */}
+      {showChatbot && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '80px',
+            right: '20px',
+            zIndex: 1000,
+            width: '370px',
+            height: '500px',
+            boxShadow: '0 0 15px rgba(0,0,0,0.2)',
+            borderRadius: '10px',
+            overflow: 'hidden',
+            backgroundColor: '#fff'
+          }}
+        >
+          <iframe
+            src="https://www.chatbase.co/chatbot-iframe/cGx3i2eK0u-08QzZzpkB-"
+            width="100%"
+            height="100%"
+            style={{ border: 'none' }}
+            title="Chatbot"
+          />
+        </div>
+      )}
     </div>
   );
 };
